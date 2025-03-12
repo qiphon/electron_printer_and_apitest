@@ -1,0 +1,58 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build and Release Electron App
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Electron App
+        run: npm run build:mac
+
+        shell: bash
+
+      - name: Prepare Release Notes
+        id: release_notes
+        run: |
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          echo "## Electron Quasar Demo ${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "### 更新内容" >> $GITHUB_ENV
+          echo "- 自动构建发布版本 ${{ github.ref_name }}" >> $GITHUB_ENV
+          echo "- 包含Windows和macOS安装包" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/electron/**/*.exe
+            dist/electron/**/*.msi
+            dist/electron/**/*.dmg
+            dist/electron/**/*.zip
+          body: ${{ env.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
