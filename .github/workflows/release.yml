@@ -53,7 +53,12 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/electron
+          files: |
+            dist/electron/**/*.exe
+            dist/electron/**/*.AppImage
+            dist/electron/**/*.dmg
+            dist/electron/**/*.zip
+            dist/electron
           draft: false
           prerelease: false
           generate_release_notes: true
