@@ -1,6 +1,6 @@
 {
   "name": "electron-quasar-demo",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Electron and Quasar demo with cross-platform support for Windows and Android",
   "main": "src-electron/electron-main.js",
   "scripts": {
