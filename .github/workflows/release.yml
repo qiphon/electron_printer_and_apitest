@@ -46,10 +46,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            dist/electron/**/*.exe
-            dist/electron/**/*.msi
-            dist/electron/**/*.dmg
-            dist/electron/**/*.zip
+            dist/electron/**/*
           body: ${{ env.RELEASE_NOTES }}
           draft: false
           prerelease: false
