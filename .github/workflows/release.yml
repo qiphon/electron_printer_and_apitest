@@ -58,7 +58,6 @@ jobs:
             dist/electron/**/*.AppImage
             dist/electron/**/*.dmg
             dist/electron/**/*.zip
-            dist/electron
           draft: false
           prerelease: false
           generate_release_notes: true
