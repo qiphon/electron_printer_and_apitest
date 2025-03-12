@@ -9,6 +9,9 @@ jobs:
   release:
     name: Build and Release Electron App
     runs-on: ${{ matrix.os }}
+    # 添加权限设置，确保有足够权限创建release和上传文件
+    permissions:
+      contents: write
     strategy:
       matrix:
         os: [macos-latest]
@@ -29,25 +32,30 @@ jobs:
         run: npm run build:all
 
         shell: bash
+      # - name: Changelog
+      #   uses: scottbrenner/generate-changelog-action@master
+      #   id: Changelog
+      #   env:
+      #     REPO: ${{ github.repository }}
 
-      - name: Prepare Release Notes
-        id: release_notes
-        run: |
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "## Electron Quasar Demo ${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "" >> $GITHUB_ENV
-          echo "### 更新内容" >> $GITHUB_ENV
-          echo "- 自动构建发布版本 ${{ github.ref_name }}" >> $GITHUB_ENV
-          echo "- 包含Windows和macOS安装包" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-        shell: bash
+      # - name: Prepare Release Notes
+      #   id: release_notes
+      #   run: |
+      #     echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+      #     echo "## Electron Quasar Demo ${{ github.ref_name }}" >> $GITHUB_ENV
+      #     echo "" >> $GITHUB_ENV
+      #     echo "### 更新内容" >> $GITHUB_ENV
+      #     echo "- 自动构建发布版本 ${{ github.ref_name }}" >> $GITHUB_ENV
+      #     echo "- 包含Windows和macOS安装包" >> $GITHUB_ENV
+      #     echo "EOF" >> $GITHUB_ENV
+      #   shell: bash
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          files: dist/electron/**
-          body: ${{ env.RELEASE_NOTES }}
+          files: dist/electron
           draft: false
           prerelease: false
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
