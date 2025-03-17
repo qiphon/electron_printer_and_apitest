@@ -17,12 +17,14 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
+    "@opentiny/vue": "^3.21.2",
     "@quasar/extras": "^1.16.9",
     "axios": "^1.6.2",
     "bonjour-service": "^1.3.0",
     "electron-updater": "^6.1.7",
     "idb": "^7.1.1",
     "quasar": "^2.14.0",
+    "unplugin-auto-import": "^19.1.1",
     "vue": "^3.3.8",
     "vue-router": "^4.2.5"
   },
@@ -30,6 +32,7 @@
     "@capacitor/android": "^5.5.1",
     "@capacitor/cli": "^5.5.1",
     "@capacitor/core": "^5.5.1",
+    "@opentiny/unplugin-tiny-vue": "^1.0.0",
     "@qiphon/prettier-config": "^1.0.1",
     "@quasar/app-vite": "^1.7.1",
     "@quasar/cli": "^2.3.0",
@@ -40,8 +43,10 @@
     "eslint": "^8.55.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-vue": "^9.19.0",
+    "less": "^4.2.2",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "unplugin-vue-components": "^28.4.1"
   },
   "author": "Qiphon",
   "license": "MIT",

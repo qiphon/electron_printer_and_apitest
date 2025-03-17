@@ -1,5 +1,8 @@
 /* eslint-env node */
 const { configure } = require('quasar/wrappers')
+const {TinyVueResolver} = require('@opentiny/unplugin-tiny-vue')
+const Components = require('unplugin-vue-components/vite').default
+const AutoImport = require('unplugin-auto-import/vite').default
 
 module.exports = configure(function (ctx) {
   return {
@@ -9,7 +12,20 @@ module.exports = configure(function (ctx) {
     extras: ['roboto-font', 'material-icons'],
     build: {
       vueRouterMode: 'hash',
-      extendViteConf(viteConf) {},
+      extendViteConf(viteConf) {
+        // 补充 @opentiny/vue plugins
+        // viteConf.plugins.push(
+        //   autoImportPlugin.default('vite')
+        // )
+        viteConf.plugins.push(
+          Components({
+            resolvers: [TinyVueResolver]
+          }))
+        viteConf.plugins.push(
+          AutoImport({
+            resolvers: [TinyVueResolver]
+          }))
+      },
       viteVuePluginOptions: {},
     },
     devServer: {
