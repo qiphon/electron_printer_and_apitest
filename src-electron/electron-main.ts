@@ -1,10 +1,10 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, ipcMain, webContents } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import axios from 'axios'
-import { execSync, exec } from 'child_process'
-import os from 'os'
 import { Bonjour, Browser } from 'bonjour-service'
+import { checkAsarUpdate } from './utils/checkAsarUpdate'
+const Logger = require('./logger')
 
 // Needed for autoUpdater
 if (process.env.PROD) {
@@ -18,79 +18,61 @@ let mainWindow: BrowserWindow | null
 const RESOURCES_PATH = app.isPackaged ? path.join(process.resourcesPath, 'assets') : path.join(__dirname, '../public')
 
 function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
-    minWidth: 800,
-    minHeight: 600,
-    useContentSize: true,
-    webPreferences: {
-      contextIsolation: true,
-      preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
-    },
-  })
+  app
+    .getGPUInfo('complete')
+    .then(info => {
+      Logger.info('gpuInfo')
+      Logger.info(info?.gpuDevice)
+      // if (info?.gpuDevice?.length === 1 && info.gpuDevice[0].active === false) {
+      //   Logger.info('gpu is unusable')
+        app.commandLine.appendSwitch('no-sandbox')
+        app.commandLine.appendSwitch('disable-gpu')
+        app.commandLine.appendSwitch('disable-software-rasterizer')
+        app.commandLine.appendSwitch('disable-gpu-compositing')
+        app.commandLine.appendSwitch('disable-gpu-rasterization')
+        app.commandLine.appendSwitch('disable-gpu-sandbox')
+        app.commandLine.appendSwitch('--no-sandbox')
+        app.disableHardwareAcceleration()
+      // }
+      mainWindow = new BrowserWindow({
+        width: 1024,
+        height: 768,
+        minWidth: 800,
+        minHeight: 600,
+        useContentSize: true,
+        webPreferences: {
+          contextIsolation: true,
+          preload: path.resolve(__dirname, process.env.QUASAR_ELECTRON_PRELOAD),
+        },
+      })
 
-  mainWindow.loadURL(process.env.APP_URL)
+      mainWindow.loadURL(process.env.APP_URL)
 
-  mainWindow.on('closed', () => {
-    mainWindow = null
-  })
+      mainWindow.on('closed', () => {
+        mainWindow = null
+      })
+    })
+    .catch(err => {
+      Logger.error('getGPUInfo error')
+      Logger.error(err)
+    })
 
   // Setup auto updater events
-  setupAutoUpdater()
 }
 
-// Auto-updater configuration
-function setupAutoUpdater() {
-  if (process.env.DEV) {
-    return
-  }
+ipcMain.handle('check-hot-update', (ev, param) => {
+  return checkAsarUpdate(mainWindow, mainWindow, param)
+})
 
-  // Set the update URL (this should match your quasar.config.js setting)
-  autoUpdater.setFeedURL({
-    provider: 'generic',
-    url: 'https://your-update-server.com/updates/',
-    channel: 'latest',
-  })
+ipcMain.handle('open-dev-tools', (ev, param) => {
+  Logger.info('open dev tool handle')
+  Logger.info(mainWindow)
+  Logger.info('webContents' in mainWindow)
+  Logger.info('openDevTools' in mainWindow?.webContents)
+  mainWindow?.webContents.openDevTools()
 
-  // Check for updates on startup
-  autoUpdater.checkForUpdatesAndNotify()
-
-  // Set interval to check for updates (e.g., every hour)
-  setInterval(
-    () => {
-      autoUpdater.checkForUpdatesAndNotify()
-    },
-    60 * 60 * 1000,
-  )
-
-  // Handle auto-updater events
-  autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for update...')
-  })
-
-  autoUpdater.on('update-available', info => {
-    console.log('Update available:', info)
-    mainWindow.webContents.send('update-available', info)
-  })
-
-  autoUpdater.on('update-downloaded', info => {
-    console.log('Update downloaded:', info)
-    mainWindow.webContents.send('update-downloaded', {
-      version: info.version,
-    })
-  })
-
-  autoUpdater.on('update-not-available', info => {
-    console.log('Update not available:', info)
-  })
-
-  autoUpdater.on('error', err => {
-    console.error('Update error:', err)
-    mainWindow.webContents.send('update-error', err.toString())
-  })
-}
-
+  // mainWindow?.webContents.openDevTools()
+})
 // IPC handlers for remote API calls
 ipcMain.handle('fetch-remote-data', async (event, { url, method, data, headers }) => {
   try {

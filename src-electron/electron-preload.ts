@@ -4,6 +4,18 @@ import { contextBridge, ipcRenderer } from 'electron';
 process.once('loaded', () => {
   // 暴露受保护的方法，允许渲染进程使用ipcRenderer而不暴露整个对象
   contextBridge.exposeInMainWorld('electronAPI', {
+    openDevTools() {
+      console.log('open dev tool handle preload')
+      ipcRenderer.invoke('open-dev-tools');
+    },
+    checkHotUpdate: async (params) => {
+      try {
+        return await ipcRenderer.invoke('check-hot-update', params);
+      } catch (error) {
+        console.error('检查热更新错误:', error);
+        throw error;
+      }
+    },
     // API调用函数
     fetchRemoteData: async (params) => {
       try {
@@ -13,7 +25,7 @@ process.once('loaded', () => {
         throw error;
       }
     },
-    
+
     // 打印机功能
     connectPrinter: async (params) => {
       try {
@@ -39,7 +51,7 @@ process.once('loaded', () => {
         throw error;
       }
     },
-    
+
     // 自动更新功能
     checkForUpdates: async () => {
       try {
@@ -57,7 +69,7 @@ process.once('loaded', () => {
         throw error;
       }
     },
-    
+
     // 自动更新事件监听器
     onUpdateAvailable: (callback) => {
       const handler = (event, ...args) => callback(...args);

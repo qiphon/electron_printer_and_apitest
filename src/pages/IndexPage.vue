@@ -4,7 +4,10 @@
 
     <q-card class="q-mb-md">
       <q-card-section>
-        <div class="text-h6">系统功能</div>
+        <div class="text-h6" @click="openDevTools">openDevTools</div>
+      </q-card-section>
+      <q-card-section>
+        <div class="text-h6" @click="checkUpdate">系统功能</div>
       </q-card-section>
 
       <q-separator />
@@ -119,6 +122,14 @@ export default defineComponent({
   },
 
   methods: {
+    openDevTools() {
+      console.log('openDevTools');
+      window.electronAPI.openDevTools();
+    },
+    checkUpdate (){
+      console.log('check update')
+      window.electronAPI.checkHotUpdate()
+    },
     detectPlatform() {
       if (process.env.MODE === 'electron') {
         return 'Electron (Desktop)';

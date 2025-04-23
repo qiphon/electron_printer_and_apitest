@@ -60,7 +60,12 @@ module.exports = configure(function (ctx) {
           url: 'http://your-update-server.com/updates/', // 这里要替换为实际的更新服务器地址
         },
         win: {
-          target: ['nsis'],
+          target: {
+            target: 'nsis',
+            // arch: ['ia32', 'x64']
+            arch: ['x64'],
+          },
+          requestedExecutionLevel: 'requireAdministrator',
           icon: 'public/icons/icon.ico',
         },
         nsis: {
